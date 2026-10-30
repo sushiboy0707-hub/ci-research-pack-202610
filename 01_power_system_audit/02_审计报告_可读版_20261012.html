@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>《王者荣耀》英雄战力系统全生命周期演进与舆情审计报告（核实修订版）</title>
+<style>
+:root{
+  --ink:#1a1d21; --ink-2:#3d444d; --ink-3:#6b7480; --ink-4:#98a1ad;
+  --line:#e3e7ed; --line-2:#f0f3f7; --bg:#ffffff; --bg-2:#f7f9fc; --bg-3:#eef2f8;
+  --blue:#1a5fb4; --blue-bg:#eaf2fd; --blue-line:#b6d4f7;
+  --red:#c01c28; --red-bg:#fdecec; --red-line:#f5b8b8;
+  --amber:#9a5b00; --amber-bg:#fff6e5; --amber-line:#f3d08a;
+  --green:#12703f; --green-bg:#e9f7ef; --green-line:#a8dfc0;
+  --purple:#5b3a99; --purple-bg:#f2ecfc; --purple-line:#cbb8ee;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg-2); color:var(--ink);
+  font:16px/1.85 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-feature-settings:"kern" 1;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 90px}
+
+/* ── 页头 ── */
+header.top{background:#fff;border-bottom:1px solid var(--line);padding:44px 0 34px;margin-bottom:34px}
+header.top .wrap{padding-bottom:0}
+.eyebrow{font-size:13px;letter-spacing:.08em;color:var(--blue);font-weight:700;margin:0 0 12px}
+h1.title{font-size:29px;line-height:1.42;margin:0 0 14px;letter-spacing:-.01em;font-weight:800}
+.lede{font-size:16px;color:var(--ink-2);margin:0 0 20px;max-width:66ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13.5px;color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:600}
+
+/* ── 修正提示条 ── */
+.alert{border-radius:10px;padding:18px 22px;margin:0 0 14px;border:1px solid;font-size:15px}
+.alert.crit{background:var(--red-bg);border-color:var(--red-line)}
+.alert.warn{background:var(--amber-bg);border-color:var(--amber-line)}
+.alert.ok{background:var(--green-bg);border-color:var(--green-line)}
+.alert.info{background:var(--blue-bg);border-color:var(--blue-line)}
+.alert .h{font-weight:800;margin:0 0 8px;font-size:15.5px}
+.alert.crit .h{color:var(--red)} .alert.warn .h{color:var(--amber)}
+.alert.ok .h{color:var(--green)} .alert.info .h{color:var(--blue)}
+.alert p{margin:0 0 8px} .alert p:last-child{margin-bottom:0}
+.alert ul{margin:6px 0 0;padding-left:20px} .alert li{margin:4px 0}
+
+/* ── 目录 ── */
+nav.toc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px 26px;margin-bottom:38px}
+nav.toc h2{font-size:14px;letter-spacing:.06em;color:var(--ink-3);margin:0 0 12px;font-weight:700;text-transform:uppercase}
+nav.toc ol{margin:0;padding-left:0;list-style:none;counter-reset:t;columns:2;column-gap:32px}
+@media(max-width:680px){nav.toc ol{columns:1}}
+nav.toc li{counter-increment:t;margin:0 0 7px;break-inside:avoid;font-size:14.5px}
+nav.toc li::before{content:counter(t)". ";color:var(--ink-4);font-variant-numeric:tabular-nums}
+nav.toc a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid transparent}
+nav.toc a:hover{color:var(--blue);border-bottom-color:var(--blue-line)}
+
+/* ── 正文 ── */
+section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:32px 34px;margin-bottom:22px}
+@media(max-width:600px){section{padding:24px 20px}}
+h2{font-size:21px;line-height:1.5;margin:0 0 6px;font-weight:800;letter-spacing:-.005em;scroll-margin-top:20px}
+h2 .num{color:var(--blue);font-variant-numeric:tabular-nums;margin-right:8px}
+h3{font-size:17px;margin:26px 0 10px;font-weight:700;color:var(--ink-2)}
+p{margin:0 0 15px;color:var(--ink-2);max-width:74ch}
+p strong,b{color:var(--ink);font-weight:700}
+a{color:var(--blue)}
+.rule{height:2px;background:var(--blue);width:38px;border-radius:2px;margin:0 0 20px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:8px;vertical-align:2px}
+.tag.fix{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
+.tag.new{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-line)}
+
+/* ── 表格 ── */
+.tw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.72;min-width:520px}
+th{background:var(--bg-3);text-align:left;font-weight:700;color:var(--ink);padding:11px 14px;border-bottom:1.5px solid var(--line);white-space:nowrap;font-size:13.5px}
+td{padding:11px 14px;border-bottom:1px solid var(--line-2);color:var(--ink-2);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--bg-2)}
+td.hi{background:var(--green-bg);color:var(--ink);font-weight:600}
+td.no{color:var(--ink-3)}
+caption{caption-side:bottom;text-align:left;font-size:12.5px;color:var(--ink-4);padding:8px 2px 0}
+
+/* ── 内联标记 ── */
+code{font-family:var(--mono);font-size:.9em;background:var(--bg-3);padding:1.5px 6px;border-radius:4px;color:var(--ink)}
+.q{background:var(--amber-bg);padding:1px 5px;border-radius:4px;font-weight:600;color:var(--ink)}
+
+/* ── 页脚 ── */
+footer{color:var(--ink-4);font-size:13px;text-align:center;padding:30px 0 0;line-height:1.9}
+
+/* ── 打印 ── */
+@media print{
+  body{background:#fff;font-size:11pt}
+  .wrap{max-width:none;padding:0}
+  header.top{border:none;padding-top:0}
+  nav.toc{break-after:page}
+  section{border:none;padding:0;margin-bottom:26px;break-inside:auto}
+  h2{break-after:avoid}
+  .tw{overflow:visible;border:1px solid #ccc}
+  table{min-width:0}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">内部审核级 · 逐条溯源核实修订版</p>
+    <h1 class="title">《王者荣耀》英雄战力系统<br>全生命周期演进与舆情审计报告</h1>
+    <p class="lede">从 2017 年荣耀战区到 2026 年 S42，把十年迭代拆成<b>时序表 + 机制解析 + 舆情分类 + 来源清单</b>四件可审核的产物。</p>
+    <div class="meta">
+      <span><b>覆盖周期</b> 2017.01 — 2026.10</span>
+      <span><b>事实基准</b> 官方一级公告</span>
+      <span><b>来源核验</b> 20 条逐条溯源</span>
+      <span><b>修订日期</b> 2026-10-12</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#s0">本次核实修正要点</a></li>
+    <li><a href="#s1">研究口径：三层证据与三条时间轴</a></li>
+    <li><a href="#s2">2017—2018：荣耀战区与巅峰赛</a></li>
+    <li><a href="#s3">2019—2024：称号、挑战赛与分路化</a></li>
+    <li><a href="#s4">S40 重构：公式变简单，衔接更复杂</a></li>
+    <li><a href="#s5">2025 争议复盘</a></li>
+    <li><a href="#s6">S41 与 S42：净胜场与统一积分</a></li>
+    <li><a href="#s7">称号、处罚与反刷分</a></li>
+    <li><a href="#s8">玩家舆情：可确认主题</a></li>
+    <li><a href="#s9">跨版本比较</a></li>
+    <li><a href="#s10">当前机制、风险与迭代方法</a></li>
+    <li><a href="#s11">来源清单与核验状态</a></li>
+  </ol>
+</nav>
+
+<!-- ══════════ 0 ══════════ -->
+<section id="s0">
+  <h2><span class="num">0</span>本次核实修正要点<span class="tag fix">重点修订</span></h2>
+  <div class="rule"></div>
+
+  <div class="alert crit">
+    <p class="h">最重要的一条：官方公布了 7 分门槛，不是「没有门槛」</p>
+    <p>原报告写「官方并未公布固定的 6.0 门槛」。但 S40 抢先服与正式服公告原文均写明：<b>结算评分小于 7 分，转化分数为 0；大于 7 分按 1:1 四舍五入转化，单场不超过 16 分。</b></p>
+    <p>结论方向（6.0 无官方依据）是对的，但表述错了：<b>官方有门槛，且是 7 分。6.0 才是第三方短视频误传。</b>原报告把「7 分」与「银牌/金牌折算」一并归入冲突的第三方经验，等于把自己的官方信源降级成了三级信源。</p>
+  </div>
+
+  <div class="alert warn">
+    <p class="h">其余需修正项</p>
+    <ul>
+      <li><b>[1] 引用错配</b>：旧公式「（历史战绩＋历史表现）×常用系数」并不在 [1] 页，[1] 全文无「常用系数」字样，该公式实出自 [17]。</li>
+      <li><b>[17] 时间与层级被抬高</b>：报告称其为「2017 年官方解读」，实为 <b>2020-05-25 署名「小齐」的玩家攻略文</b>，时间差 3 年。</li>
+      <li><b>[9] 引用错配</b>：该 URL 打开的是《2 月 27 日体验服不停机更新公告》，并非报告所称的「6 月 17 日体验服公告」；标注为 [9] 的引文「我们移除了战力保护和战力加速规则」实际位于 [10]。</li>
+      <li><b>[11] 引用错配</b>：该 URL 是《7 月 3 日正式服 S40 公告》，全文检索「开麦／社区／不满／吐槽」<b>均未命中</b>；该引文的真实出处是 2025-07-09 官方致歉表态。</li>
+      <li><b>三条官方链接已失效</b>：[2]、[4]、[7] 均返回 404；<b>[18] 页面无正文</b>；<b>[20] 页面内容与引文完全无关</b>（该页是匹配机制／挂机扣分 FAQ）。</li>
+      <li><b>回收数值口径</b>：官方原文写「7→5 场」，报告只写理论值「4.5 场」，应两值并列。</li>
+    </ul>
+  </div>
+
+  <div class="alert ok">
+    <p class="h">结论层站得住，可放心使用</p>
+    <p>主要事实链均获官方原文逐字支持：<b>荣耀战区（2017-01-12）先于巅峰赛（S11／2018-04-19）</b>；<b>S40 首周异常是跨赛季结算故障，而非设计意图</b>；45 场滚动最优；输不扣表现分；S41 净胜场；S42 统一积分。<b>报告没有把 S40 首周异常写成乘积模型的必然结果</b>，这个判断是对的。</p>
+  </div>
+</section>
+
+<!-- ══════════ 1 ══════════ -->
+<section id="s1">
+  <h2><span class="num">1</span>研究口径：三层证据与三条时间轴必须分开</h2>
+  <div class="rule"></div>
+  <p>本报告把来源分成三层。<b>第一层</b>是王者荣耀官网、腾讯客服、腾讯游戏安全中心发布的规则与公告，是还原机制的主要依据；<b>第二层</b>是腾讯新闻、游民星空、新浪等转引的媒体内容，只用于核验官方回应的传播与舆情线索，不单独承担规则判断；<b>第三层</b>是攻略站、社区帖、短视频解读，仅用于识别玩家争议与待核验说法，其数值若无第一层支持，均标记为「玩家推测」或「冲突，不采用」。</p>
+  <div class="alert info">
+    <p class="h">系统上线、规则生效、赛季更新不是同一概念</p>
+    <p>荣耀战区于 2017 年 1 月 12 日在四平台部分服务器灰度开放，不等于全服当天可见；巅峰赛 S11 的正式服更新日为 2018 年 4 月 19 日，其后 S12 在赛季内又调整榜单与开放时间，不能写成「2017 年」或「S12」。S40 抢先服公告发布于 6 月 26 日、正式服 7 月 3 日，属连续测试与上线，不是两个互相矛盾的版本。</p>
+  </div>
+</section>
+
+<!-- ══════════ 2 ══════════ -->
+<section id="s2">
+  <h2><span class="num">2</span>2017—2018：荣耀战区先建立区域排名，巅峰赛后提供跨英雄加成</h2>
+  <div class="rule"></div>
+
+  <p><b>荣耀战区的设计起点是「英雄×地区」，而不是全国绝对值榜。</b>2017 年 1 月 12 日《无限荣耀》版本公告称，玩家有偏爱的精通英雄，但旧系统不能准确表现单个英雄实力，也无法表达玩家在所在区域中的水平；开启排位赛即默认激活荣耀战区。当时公告只概括说提高荣耀战力是取得称号的方法，没有给出后来那套 1000—4000 的硬门槛。因此把「区级 1000、市级 2000」倒推成 2017 年上线日规则，是时间错位。</p>
+
+  <p>首发规则的核心是继承与表现。官方解释，英雄初始战力来自上赛季排位历史数据，包含各段位胜场、胜率与使用频率；<b>未使用的英雄初始为 100</b>。每场表现会与预期表现比较并在队内排名，排名越高则胜局加分越多、负局扣分越少；高段位向下覆盖低段位收益。官方同时明确「<span class="q">躺赢不会扣分，只是加的会比较少</span>」，说明评分和贡献一直是计分输入。</p>
+
+  <p><b>巅峰赛是独立的门槛化竞技模式，不是战区系统的附属开关。</b>官方更新资料称巅峰赛于 S11 上线、正式服 4 月 19 日更新；参与条件包括本赛季最强王者、当前星耀 II 以上、信誉分 100，以及全服王者人数达到开启门槛。早期巅峰积分起点 1200，官方规则称 1200 以下不增不减英雄战力；每 20 分提升全英雄巅峰战力加成 1%。这构成后来「巅峰系数」的早期形式，但不等于 S40 之后的「巅峰分路系数」。</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>时期</th><th>核心公式或结构</th><th>关键门槛</th><th>设计目的</th></tr></thead>
+    <tbody>
+      <tr><td>2017 上线初</td><td>（历史战绩＋历史表现）×常用系数<div style="font-size:12.5px;color:#9a5b00;margin-top:6px">注：此公式出自 2020 年官网攻略文 [17]，非 2017 年公告</div></td><td>排位激活战区；未用英雄初始 100</td><td>评价单英雄实力、形成区域排名</td></tr>
+      <tr><td>2018 巅峰赛初期</td><td>排位战力与巅峰战力构成主体</td><td>1200 分以下不加不扣；每 20 分约 ＋1%</td><td>给高段位单排提供全国竞争与全英雄加成</td></tr>
+      <tr><td>后续旧版界面</td><td>（胜场＋排位表现＋巅峰表现）×巅峰系数×活跃系数</td><td>段位和巅峰分控制各池上限</td><td>同时衡量胜场、表现、巅峰水平与使用活跃度</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══════════ 3 ══════════ -->
+<section id="s3">
+  <h2><span class="num">3</span>2019—2024：称号门槛化、挑战赛化与分路化</h2>
+  <div class="rule"></div>
+
+  <p><b>2019 年称号规则从「能进榜」改为「进榜且达到最低战力」。</b>官方称号优化公告明确：初级荣耀（区）需 1000 战力，中级荣耀（市）2000，高级荣耀（省）3000，国服最强（全国）4000；同时扩展历史称号展示与隐私设置。这把「上榜资格」由单一排名改为「排名×最低战力」双重条件，能阻止极小区或极冷门英雄靠低绝对分拿高等级称号，但<b>不能被误写成「只要达到 4000 就必拿国服最强」</b>：国服最强仍需全国排名达到该赛季榜单要求。</p>
+
+  <p><b>巅峰挑战赛把短期冲分变成额外的临时系数层。</b>历史规则中，挑战赛在周五、周六 18:00—24:00 开放，要求本赛季最高段位达到王者；每场胜利给参战英雄额外巅峰战力。官方后来认为 S40 老版挑战赛既加战力又加系数、高分系数存在膨胀，因此在新版改为每胜固定增加作用于该分路所有英雄的巅峰系数，<b>12 胜最多 28.8%</b>。</p>
+
+  <p><b>活跃系数不是 S40 新增，而是旧版控制「占有英雄却不使用」的核心手段。</b>官方客服规则指出，未使用 A 英雄也可能掉战力：若其他英雄的巅峰赛失败导致巅峰积分下降，所有英雄的加成系数都会下降；若 A 英雄超过 7 天未使用，也会出现战力下降。<b>旧版的准确衰减比例、最低下限和恢复速度，公开官方资料并不完整。</b>第三方攻略常写「每周降 5%、最低 60%」，但均缺官方公式，本报告不将其作为事实常数。</p>
+
+  <p><b>S39 把巅峰总分拆成五路，是 S42 重新合并前的必经阶段。</b>2025 年 2 月 27 日体验服与 3 月 27 日正式服公告说明，因不同分路自然上分速率不同，统一巅峰分排名存在公平性争议；S39 改由一条总分拆为五条分路积分，每路独立排名，并取消补位。英雄巅峰表现分也由总分拆为多分路：选用某路出战只影响该路表现分，<b>最终取最高一路计入英雄战力</b>；巅峰系数仍由最高一条分路积分换算。</p>
+</section>
+
+<!-- ══════════ 4 ══════════ -->
+<section id="s4">
+  <h2><span class="num">4</span>S40 重构：公式变简单，赛季衔接与活跃替代却更复杂</h2>
+  <div class="rule"></div>
+
+  <p><b>S40 的正式公式是乘法，不是「表现分＋巅峰系数」。</b>6 月 26 日抢先服与 7 月 3 日正式服公告均采用同一表述：英雄战力由表现分和巅峰分路系数构成，二者相乘；排位赛与巅峰赛均加表现分，结算评分越高表现分越高，系统储存 45 场赛季最优单局表现分，高表现自动挤走最低表现，即使达到上限，滚动记录仍继续。</p>
+
+  <div class="alert ok">
+    <p class="h">官方原始条款（本轮直连取回，逐字）</p>
+    <p>表现分构成：表现分 = 基础分 × 段位系数</p>
+    <p><b>基础分与结算评分的转化方式：若结算评分小于 7 分，转化分数为 0；若结算评分大于 7 分，按四舍五入 1:1 转化，不超过 16 分。</b></p>
+    <p>举例：王者 2 星、评分 9、段位系数 10.6，单场贡献 9×10.6＝95.4（四舍五入 95）；巅峰 1556 分、评分 13、系数 11.2，则 13×11.2＝145.6（四舍五入 146）。</p>
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>S40 正式服项目</th><th>规则</th><th>证据限制</th></tr></thead>
+    <tbody>
+      <tr><td>基础公式</td><td>英雄战力＝表现分×巅峰分路系数</td><td>官方正式服公告 [11]</td></tr>
+      <tr><td>表现分池</td><td>45 场赛季最优单局表现分之和</td><td>官方未公布全部评分映射表</td></tr>
+      <tr><td class="hi">单局门槛</td><td class="hi">结算评分小于 7 分转化 0；大于 7 分 1:1 四舍五入，单场上限 16 分</td><td>官方抢先服 [10] 与正式服 [11] 均有；「6.0 门槛」无官方依据</td></tr>
+      <tr><td>输赢关系</td><td>不因输掉比赛扣表现分</td><td>仅指表现分池，不等于英雄战力不受巅峰分下降影响</td></tr>
+      <tr><td>多分路英雄</td><td>取分路巅峰积分最高的一条计算系数</td><td>不是多路系数相加</td></tr>
+      <tr><td>周回收</td><td>每周一发标后回收最低 15%</td><td>S40 首周口径，后多次调整</td></tr>
+    </tbody>
+  </table></div>
+
+  <p><b>体验服的 60 场是中间方案，不是最终 S40 公式。</b>6 月 17 日体验服公告曾写表现分由 60 场降为 45 场、回收最低 15%、每场评分映射、移除排位与巅峰周活跃惩罚。6 月 26 日抢先服将 45 场及系数细节进一步产品化；7 月 3 日正式服再小幅修正计算示例。所谓「每局评分×表现分系数×45 场」只能概括最终产品，不等于官方公布过单一常数的乘法表。</p>
+
+  <p><b>取消活跃系数是简化，但回收承担了两个不同目标。</b>官方把旧活跃衰减理解为「一段时间不打就掉」，S40 希望表现好、即使失败也能加战力，因而用周回收替代。这里存在目标冲突：回收要维持长期活跃，却按表现高低而非时长回收；它奖励高分对局，却不惩罚缺席本身。若高分池已封顶，回收最低场后剩余分仍可能高于上限，玩家表面「不掉战力」；若表现分池未满，则低分周会明显掉分。</p>
+
+  <p><b>S40 首周异常是跨系统状态错配，而非「策划宣布让低分拿标」。</b>官方 7 月 7 日公告明确：巅峰赛延迟开启时，巅峰系数本应锁定上赛季结束时的巅峰分数；跨赛季结算异常却把所有玩家重置为相同巅峰系数。由于没有开启巅峰赛，玩家暂时无法提升系数，因此首周称号不能准确反映既有英雄战力，官方承诺 7 月 14 日正确结算，并发放皮肤碎片×5＋排位保护卡×1＋星币×50 作为补偿。</p>
+
+  <div class="alert info">
+    <p class="h">回收口径需并列两个数值</p>
+    <p>官方 7 月 10 日公告原文：<b>战力周回收场次：15%→10%；每周打满 45 场时回收：7→5 场</b>。</p>
+    <p>按 45 场理论计算则为 6.75→4.5 场；官方在 6 月 26 日抢先服举例中即写「45×15%＝6.75 场（四舍五入为 7 场）」。两者不冲突，但<b>不应只写理论值 4.5 而略去官方执行值 5</b>。</p>
+    <p>7 月 17 日进一步改为按英雄表现分池场次数计算、回收 10% 向下取整、不足 10 场不回收。此项本轮仅取到第三方转述，官方原文未直接取回，标注为待复核。</p>
+  </div>
+</section>
+
+<!-- ══════════ 5 ══════════ -->
+<section id="s5">
+  <h2><span class="num">5</span>2025 争议复盘：真正的问题不是单一公式，而是三条链同时错配</h2>
+  <div class="rule"></div>
+
+  <p><b>「英雄战力＝表现分×巅峰系数/巅峰分路系数」在新版语境下是正确的，但旧版不兼容。</b>S40 之前，英雄战力至少包含胜场、排位表现、巅峰表现、巅峰系数和活跃系数，绝不能用乘法新公式回算早期榜单。S39 更明确是分路巅峰表现与分路最高系数。媒体或攻略若写「一直都是表现分乘巅峰系数」，忽略了 2017 年历史战绩/表现/常用系数、中期巅峰战力池和活跃系数，属于版本混淆。</p>
+
+  <p><b>周回收争议的本质是「封顶前肝度」与「封顶后稳定」的不对称。</b>官方回应承认玩家反映周回收逼肝、高分后加表现分门槛高、单局增加少。解释是：当现有 45 场中最低分高于新局评分时，新局不替换，表现分自然不变；这是滚动最优池的必然结果，不是「赢一局不加」。但对每周只打数局、又希望保住省级或小国标位置的玩家，低分池尚未形成时，回收仍造成明显维持成本。</p>
+
+  <p><b>2025 年刷分争议至少包含三类不同行为。</b>第一类是旧版掉段后到低段「虐菜」，官方安全公告明确会封号、清榜和禁榜；第二类是 S40 首周系数统一造成的异常上榜，属于系统结算错误，不是玩家主动刷分；第三类是利用低分英雄、跨英雄共享系数获取荣誉，属于设计漏洞讨论。S41 的净胜场调整明确针对「在低分段用 A 英雄刷满场次解锁系数上限、再用 B 英雄上分、最终拿到 A 英雄战力荣誉」，说明跨英雄系数共享若没有英雄关联条件，就会制造荣誉归属错配。</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>2025 事件</th><th>官方确认事实</th><th>玩家争议</th><th>结论边界</th></tr></thead>
+    <tbody>
+      <tr><td>7 月 3 日新公式</td><td>表现分 45 场最优 × 巅峰分路系数</td><td>肝度、后期难加分</td><td>规则本身与体验评价须分开</td></tr>
+      <tr><td>7 月首周低分拿标</td><td>系数应锁上季末值；异常统一重置</td><td>「策划想让低分拿标」</td><td>官方否认，属于传言</td></tr>
+      <tr><td>周回收</td><td>7 月 10 日前 15%，后 10%，7 月 17 日按场次与向下取整调整</td><td>上班族保标压力</td><td>官方三次降回收，但缺玩家抽样数据</td></tr>
+      <tr><td>高巅峰继承偏低</td><td>官方称表现分继承机制有问题</td><td>上季高分起步低于低星玩家</td><td>官方承诺按上季末最后一天表现分继承</td></tr>
+      <tr><td>低分英雄刷系数</td><td>S41 以净胜场限制跨英雄漏洞</td><td>净胜场是否造成「看阵容不拿」</td><td>反刷分与选将自由仍有张力</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>关于「单局评分计入表现分」的门槛 —— 本次核实重点修订</h3>
+  <div class="alert ok">
+    <p class="h">官方门槛是 7 分，不是 6.0，也不是「没有门槛」</p>
+    <p>S40 抢先服与正式服公告均写明：<b>结算评分小于 7 分，转化分数为 0</b>。</p>
+    <p>流传的「6.0 分及格线」来自第三方短视频与攻略，无官方依据，属误传。</p>
+    <p><b>仍需保留的限定</b>：7 分是「入池门槛」，一局最终能否计入 45 场池，还取决于它是否高于池内既有最低场——这是相对排序条件，不是绝对常数。官方亦未公布完整的评分→表现分映射表。</p>
+  </div>
+</section>
+
+<!-- ══════════ 6 ══════════ -->
+<section id="s6">
+  <h2><span class="num">6</span>S41 与 S42：反刷分从全英雄共享转向英雄净胜场，再回到统一巅峰分</h2>
+  <div class="rule"></div>
+
+  <p><b>S41 的净胜场是「英雄身份—分段表现」的绑定器。</b>2025 年 9 月 25 日 S41 正式服公告称，原来解锁单英雄巅峰系数上限只要求巅峰赛打满 20 个胜场，没有分段门槛，于是可低分刷 A 英雄场次、再拿 B 英雄荣誉；新规则按每 100 分一个阶段设置净胜场，完成低分段全部需求才解锁下一阶段，失败不影响已完成阶段。胜利使当前净胜场＋1，失败−1，最低到 0；英雄分显著低于巅峰分时，每次胜利可追赶增加多个净胜场（<b>巅峰分大于英雄激活分 500/250 分以上时，每次胜利增加 4/2 个净胜场</b>），赛季继承后按新巅峰分自动向下取整。</p>
+
+  <p><b>S41 赛季继承回收 20%，实际最多回收 9 场。</b>公告原文：完整保留上赛季 80% 的对局场次的表现分，按照表现分从高到低排序均匀回收 20% 的场次，<b>每 5 场回收 1 场对局，至多回收 9 场</b>；45 场时回收第 5、10、15……45 场共 9 场，13 场时仅回收第 5、10 场。这与 S40 周回收不同：前者是赛季切换时的继承折损，后者是每周称号结算后的活跃性扣减。<b>两者若同时描述，必须标明生命周期阶段。</b></p>
+
+  <p><b>S42 并非回到 S11 前的巅峰赛，而是在统一积分之上保留分路榜。</b>2026 年 1 月 8 日 S42 正式服公告将五条分路积分合并为一个巅峰积分，用于匹配、排行榜和奖励；巅峰总榜回归，前 100 名获「巅峰路人王」，巅峰王者改由总榜前 10000 名发放；各分路榜保留并增加全能榜。<b>英雄战力中的「巅峰分路系数」也相应变为「巅峰系数」，不再区分分路。</b>分路榜归属按最近 50 场分路占比判断，最高的分路场次不超过总场次 50% 则归入全能榜。</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>版本</th><th>巅峰积分形态</th><th>系数与英雄关系</th><th>主要收益</th></tr></thead>
+    <tbody>
+      <tr><td>S11—S38（早期）</td><td>单一巅峰总分</td><td>全英雄共享加成</td><td>排名简洁、全国可比</td></tr>
+      <tr><td>S39—S41</td><td>五条分路积分</td><td>分路最高系数；S41 再要求英雄净胜场</td><td>缓解分路上分速度差异</td></tr>
+      <tr><td>S42 起</td><td>统一巅峰积分</td><td>英雄战力使用巅峰系数，不再分路</td><td>总榜统一、分路榜保留、降低选路复杂</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══════════ 7 ══════════ -->
+<section id="s7">
+  <h2><span class="num">7</span>称号、处罚与反刷分：公开边界与盲区</h2>
+  <div class="rule"></div>
+
+  <p><b>荣耀称号至少涉及三类不同计算对象。</b>第一类是英雄战力称号，按荣耀战区的区、市、省和全国排名，外加最低战力门槛；第二类是巅峰分路称号，按分路榜单与分路表现；第三类是巅峰总榜、王者人数、万强或「巅峰路人王」等巅峰积分荣誉。S39 公告称分路称号区、市、省、全国为每周结算，国服最强每月 1 日结算；S42 又把分路榜归属和统一巅峰分条件纳入新榜体系。若材料没有说明具体英雄和赛季，不能把某一期截图的最低上榜分数泛化成永久门槛。</p>
+
+  <p><b>反刷分同时依靠规则和经济处罚。</b>腾讯游戏安全中心公布的恶意掉分刷战力处罚为分档制：第一次封号 7 天＋清榜禁榜 30 天；第二次封号 30 天＋清榜禁止上榜 90 天；第三次封号 90 天＋清榜禁止上榜 365 天。S41 还把违规扣巅峰分与补偿受害玩家纳入规则，并以每周触发一次、按分段逐步开放的方式验证。</p>
+
+  <div class="alert warn">
+    <p class="h">风控透明度的公开边界</p>
+    <p>公开资料没有检测模型、命中率和误伤率，无法评估准确率；官方也未披露禁榜时长、申诉恢复周期与年度封号全量清单。因此本报告不给出「封号量」「误伤率」等任何绝对值。</p>
+  </div>
+</section>
+
+<!-- ══════════ 8 ══════════ -->
+<section id="s8">
+  <h2><span class="num">8</span>玩家舆情：可确认主题，不可确认全网占比</h2>
+  <div class="rule"></div>
+
+  <p><b>2025 年官方自己确认了四个主要投诉方向。</b>2025 年 7 月 9 日官方致歉表态称：「<span class="q">关于 S40 赛季战力系统，我们近期观察到了很多玩家的反馈和吐槽</span>」；媒体转述被玩家集中反馈的四类问题为：跨赛季首周荣耀称号结算异常、战力周回收设计逼肝、加表现分门槛高、单局战力增加少。<b>这是官方公开承认存在的反馈主题，但官方没有公布反馈总量、平台分布、去重样本和正负比例。</b></p>
+
+  <div class="tw"><table>
+    <thead><tr><th>阶段</th><th>可核验舆情主题</th><th>样本与数量级</th><th>判断</th></tr></thead>
+    <tbody>
+      <tr><td>2017 上线</td><td>区服开放不均、初始战力高低不一</td><td>无公开全量样本</td><td>官方主动解释继承规则 [1]</td></tr>
+      <tr><td>2019 称号门槛</td><td>低战区是否过易、高段称号含金量</td><td>无公开调查</td><td>官方设最低战力门槛 [6]</td></tr>
+      <tr><td>2025 年 7 月</td><td>低分拿标、回收逼肝、继承偏低、高分段难加分</td><td>官方称「很多反馈」，无样本量；热帖评论为数百至数千量级、平台自报，无法去重</td><td>主要诉求为回滚异常、降低回收、改善继承 [12]</td></tr>
+      <tr><td>S41 净胜场</td><td>支持绑定英雄水平；反对看阵容、卡分与冷门英雄难度</td><td>无全量调查；NGA 公开热帖可观察到正反辩论，但无统计表</td><td>争议从「公式复杂度」转向「竞技行为扭曲」[15]</td></tr>
+      <tr><td>S42 统一积分</td><td>总榜回归、万强赛奖励、分路榜归属</td><td>官方称吸收 28 万份共创投稿；这是投稿量，不等于净支持率</td><td>可证明共创参与量，不能证明某方案获多数支持 [16]</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="alert warn">
+    <p class="h">对舆情数字必须保留两项限制</p>
+    <p>第一，「官方看到很多反馈」不是样本量；第二，微博、虎扑、NGA、抖音热帖的浏览、评论和点赞<b>不能合并成全玩家比例</b>，因为平台用户结构、推荐算法和帖子可见性不同。因此本报告不提供所谓「负面占比」。</p>
+  </div>
+</section>
+
+<!-- ══════════ 9 ══════════ -->
+<section id="s9">
+  <h2><span class="num">9</span>跨版本比较：公平、肝度、理解成本之间存在不可消除的张力</h2>
+  <div class="rule"></div>
+  <div class="tw"><table>
+    <thead><tr><th>维度</th><th>旧版多维结构</th><th>S40 表现分×分路系数</th><th>S41 净胜场</th><th>S42 统一积分</th></tr></thead>
+    <tbody>
+      <tr><td>理解成本</td><td>高</td><td class="hi">低</td><td>中高</td><td>中</td></tr>
+      <tr><td>防掉段刷分</td><td>中等，依赖活跃与检测</td><td>中，表现不随输赢扣</td><td>中高，绑定分段</td><td>中高，总榜统一</td></tr>
+      <tr><td>防跨英雄盗系数</td><td>弱</td><td>弱</td><td class="hi">较强</td><td>仍共享但系数统一</td></tr>
+      <tr><td>维持成本</td><td>持续活跃</td><td>每周高分替换</td><td>分段净胜</td><td>总榜高分与分路归属</td></tr>
+      <tr><td>最大风险</td><td>行为扭曲、界面复杂</td><td>回收与赛季衔接</td><td>卡分段、看阵容</td><td>分路评价边缘化</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══════════ 10 ══════════ -->
+<section id="s10">
+  <h2><span class="num">10</span>当前机制总结、现存风险与可借鉴的迭代方法</h2>
+  <div class="rule"></div>
+
+  <p><b>截至 2026 年 10 月可确认的核心结构仍是「表现分×巅峰系数」，但 S42 后系数不再分路。</b>当前表现分由排位赛和巅峰赛的高分对局构成，S41 继承时保留 80% 的表现分场次、按高分均匀回收 20%，最多 9 场；S42 又统一巅峰积分并保留分路子榜。因此不能继续写「巅峰分路系数」作为当前正式名称，应写「巅峰系数」，并把「分路」限定为 S39—S41 历史机制。</p>
+
+  <p><b>当前仍存在五类风险：</b>其一，赛季切换与模式开放时间不同步，可能再次制造首周系数或称号错配，S40 已有先例。其二，45 场滚动最优池对样本量较少的英雄更敏感，少量极端高分能抬高长期战力。其三，净胜场限制跨英雄盗用，却可能让冷门英雄玩家在阵容不匹配时承担更高荣誉成本。其四，周回收、赛季继承和段位上限三种衰减并存，普通玩家很难判断某一场为何没有增加。其五，禁榜、转区和风控细节不公开，异常时无法独立核验。</p>
+
+  <div class="alert info">
+    <p class="h">可借鉴的迭代方法不是继续增加公式，而是把「荣誉」拆成可解释的三层</p>
+    <p><b>能力分</b>：表现分作为赛季内英雄表现估计，应采用稳定估计而非 45 场纯最优分，例如高分滚动池加时间衰减。</p>
+    <p><b>排名分</b>：荣耀战区按战区、英雄和活跃赛季做分层排名，对低样本英雄给更保守估计。</p>
+    <p><b>荣誉资格</b>：称号同时看排名、最低战力、样本场次数和近期表现，而不是只设绝对门槛。</p>
+  </div>
+</section>
+
+<!-- ══════════ 11 ══════════ -->
+<section id="s11">
+  <h2><span class="num">11</span>来源清单与核验状态</h2>
+  <div class="rule"></div>
+  <div class="tw"><table>
+    <thead><tr><th>编号</th><th>来源</th><th>层级</th><th>本轮核验状态</th></tr></thead>
+    <tbody>
+      <tr><td>[1]</td><td>2017-01-12 荣耀战区玩法规则介绍</td><td>一级</td><td class="hi">全中；不含「常用系数」公式</td></tr>
+      <tr><td>[2]</td><td>腾讯客服 FAQ（7 天未使用掉战力）</td><td>一级</td><td class="no">链接 404，需换源或标待核</td></tr>
+      <tr><td>[3]</td><td>腾讯游戏安全中心 恶意掉分刷战力处罚公告</td><td>一级</td><td class="hi">命中；处罚为分档制（7/30/90 天封号）</td></tr>
+      <tr><td>[4]</td><td>2018-04 S11 更新公告</td><td>一级</td><td class="no">链接 404；结论由 [5] 与多方旁证支持</td></tr>
+      <tr><td>[5]</td><td>2018-06-27 体验服停机更新公告</td><td>一级</td><td class="hi">实质中；引文「将迎来」应为「迎来了」</td></tr>
+      <tr><td>[6]</td><td>荣耀称号系统优化（2019-04）</td><td>一级</td><td class="hi">逐字中：1000/2000/3000/4000</td></tr>
+      <tr><td>[7]</td><td>2018-09 巅峰赛战力加成说明</td><td>一级</td><td class="no">链接 404；结论由 [19] 逐字旁证</td></tr>
+      <tr><td>[8]</td><td>S39 分路化公告</td><td>一级</td><td class="hi">逐字中</td></tr>
+      <tr><td>[9]</td><td>体验服公告</td><td>一级</td><td>URL 实为「2 月 27 日体验服」，非「6 月 17 日」；引文「移除战力保护」实出自 [10]</td></tr>
+      <tr><td>[10]</td><td>S40 抢先服版本更新公告（06-26）</td><td>一级</td><td class="hi">逐字中；含 7 分门槛条款</td></tr>
+      <tr><td>[11]</td><td>S40 正式服版本更新公告（07-03）</td><td>一级</td><td class="hi">逐字中；但引文「策划开麦」不在此页</td></tr>
+      <tr><td>[12]</td><td>2025-07-07 荣耀称号结算说明公告</td><td>一级</td><td class="hi">逐字中：重置系数、7-14 重结算、补偿</td></tr>
+      <tr><td>[13]</td><td>2025-07-10 更新公告</td><td>一级</td><td class="hi">逐字中：15%→10%、7→5 场</td></tr>
+      <tr><td>[14]</td><td>高手游 7 月 17 日更新转述</td><td>三级</td><td>内容属实但违反本报告自订信源分层，应降级表述</td></tr>
+      <tr><td>[15]</td><td>2025-09-25 S41 正式服公告</td><td>一级</td><td class="hi">逐字中：净胜场、80%/20%、至多 9 场</td></tr>
+      <tr><td>[16]</td><td>2026-01-08 S42 正式服公告</td><td>一级</td><td class="hi">逐字中：统一巅峰分、总榜回归、系数改名</td></tr>
+      <tr><td>[17]</td><td>官网攻略文《解析英雄荣耀战力加分明细》</td><td>一级偏弱</td><td>实为 2020-05-25 署名攻略文，非「2017 年官方解读」</td></tr>
+      <tr><td>[18]</td><td>官网文章详情</td><td>—</td><td class="no">页面无正文，引文无法溯源</td></tr>
+      <tr><td>[19]</td><td>官网攻略文《荣耀战力的细节加成》</td><td>一级偏弱</td><td class="hi">逐字中：旧五维公式、每 20 分＋1%</td></tr>
+      <tr><td>[20]</td><td>3v3 对局环境情报站</td><td>—</td><td class="no">页面内容与引文完全无关，引文无法溯源</td></tr>
+      <tr><td>新增</td><td>2025-07-09 官方致歉表态（游民星空等转述）</td><td>二级</td><td class="hi">用于「反馈和吐槽」引文，标明为媒体转述</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="alert info">
+    <p class="h">核实方法与边界</p>
+    <p>本清单所述「逐字中」，指该页正文经真实浏览器渲染后取回、并在其中检索到报告所引字符串。三条 404 来源与两条内容无关来源，均已用外部检索寻找旁证，旁证结论单独标注，不冒充一手证据。</p>
+    <p>凡本轮未能取得官方原文者（如 7 月 17 日回收细则），一律标注为待复核，不升格为已核事实。</p>
+  </div>
+</section>
+
+<footer>
+  《王者荣耀》英雄战力系统全生命周期演进与舆情审计报告 · 核实修订版<br>
+  事实基准：官方一级公告 ｜ 修订日期：2026-10-12 ｜ 内部审核用
+</footer>
+
+</div>
+</body>
+</html>
